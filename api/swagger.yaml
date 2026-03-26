@@ -1,0 +1,791 @@
+openapi: 3.0.3
+info:
+  title: Log Analyzer API
+  description: |
+    Intelligent log analysis system for automated log parsing, error detection, 
+    and root cause analysis.
+    
+    ## Features
+    - Upload log files (.log, .txt) or plain text logs
+    - Intelligent error detection and classification
+    - Pattern recognition using regex
+    - Root cause analysis
+    - Date and metadata filtering
+    - Top N errors reporting
+    - HTTP status code analysis
+    
+    ## Error Categories
+    - `NETWORK` - Network connectivity issues
+    - `VALIDATION` - Data validation errors
+    - `SERVER` - Internal server errors
+    - `DATABASE` - Database errors
+    - `AUTHENTICATION` - Auth failures
+    - `AUTHORIZATION` - Permission errors
+    - `TIMEOUT` - Timeout errors
+    - `RATE_LIMIT` - Rate limiting
+    - `NOT_FOUND` - Resource not found
+    - `BAD_REQUEST` - Bad request errors
+    - `UNKNOWN` - Uncategorized errors
+    
+    ## Severity Levels
+    - `CRITICAL` - Immediate action required
+    - `HIGH` - High priority
+    - `MEDIUM` - Moderate priority
+    - `LOW` - Low priority
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Logs
+    description: Log upload and management
+  - name: Analysis
+    description: Log analysis endpoints
+  - name: Errors
+    description: Error analysis endpoints
+  - name: Filter
+    description: Log entry filtering
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the API is running and healthy
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness check
+      description: Check if the API is ready to accept requests
+      operationId: readinessCheck
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+
+  /logs/upload:
+    post:
+      tags:
+        - Logs
+      summary: Upload log file
+      description: Upload a log file (.log, .txt) for analysis
+      operationId: uploadLogFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Log file to upload (.log, .txt)
+      responses:
+        '201':
+          description: Log file uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          description: Invalid file or request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logs/upload-text:
+    post:
+      tags:
+        - Logs
+      summary: Upload log text
+      description: Upload log content as plain text
+      operationId: uploadLogText
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadTextRequest'
+      responses:
+        '201':
+          description: Log text uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logs/analyze/{batchId}:
+    post:
+      tags:
+        - Analysis
+      summary: Analyze logs
+      description: Perform complete analysis of uploaded logs
+      operationId: analyzeLogs
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: Batch ID from upload response
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Analysis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+        '404':
+          description: Batch not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logs/errors/top/{batchId}:
+    get:
+      tags:
+        - Errors
+      summary: Get top errors
+      description: Get the most frequent error patterns
+      operationId: getTopErrors
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: Batch ID
+          schema:
+            type: string
+            format: uuid
+        - name: n
+          in: query
+          required: false
+          description: Number of top errors to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: category
+          in: query
+          required: false
+          description: Filter by error category
+          schema:
+            type: string
+            enum:
+              - NETWORK
+              - VALIDATION
+              - SERVER
+              - DATABASE
+              - AUTHENTICATION
+              - AUTHORIZATION
+              - TIMEOUT
+              - RATE_LIMIT
+              - NOT_FOUND
+              - BAD_REQUEST
+              - UNKNOWN
+      responses:
+        '200':
+          description: Top errors retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopErrorsResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logs/errors/by-date/{batchId}:
+    get:
+      tags:
+        - Errors
+      summary: Get errors by date
+      description: Get errors within a date range
+      operationId: getErrorsByDate
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: Batch ID
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: false
+          description: Start date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: false
+          description: End date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: category
+          in: query
+          required: false
+          description: Filter by error category
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Errors retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorsByDateResponse'
+
+  /logs/errors/root-cause/{batchId}:
+    get:
+      tags:
+        - Errors
+      summary: Get root cause analysis
+      description: Analyze root causes of errors with suggested fixes
+      operationId: getRootCause
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: Batch ID
+          schema:
+            type: string
+            format: uuid
+        - name: patternId
+          in: query
+          required: false
+          description: Specific pattern ID to analyze
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Root cause analysis retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RootCauseResponse'
+
+  /logs/filter/{batchId}:
+    get:
+      tags:
+        - Filter
+      summary: Filter log entries
+      description: Filter log entries by various criteria
+      operationId: filterEntries
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          description: Batch ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          required: false
+          description: Items per page
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: startDate
+          in: query
+          required: false
+          description: Start date filter
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: false
+          description: End date filter
+          schema:
+            type: string
+            format: date-time
+        - name: userId
+          in: query
+          required: false
+          description: Filter by user ID
+          schema:
+            type: string
+        - name: transactionId
+          in: query
+          required: false
+          description: Filter by transaction ID
+          schema:
+            type: string
+        - name: errorCategory
+          in: query
+          required: false
+          description: Filter by error category
+          schema:
+            type: string
+        - name: severity
+          in: query
+          required: false
+          description: Filter by severity level
+          schema:
+            type: string
+            enum:
+              - CRITICAL
+              - HIGH
+              - MEDIUM
+              - LOW
+      responses:
+        '200':
+          description: Filtered entries retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilteredEntriesResponse'
+
+  /logs/batches:
+    get:
+      tags:
+        - Logs
+      summary: Get all batches
+      description: Get all uploaded log batches
+      operationId: getBatches
+      responses:
+        '200':
+          description: Batches retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchesResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: healthy
+            timestamp:
+              type: string
+              format: date-time
+            uptime:
+              type: number
+            memory:
+              type: object
+              properties:
+                used:
+                  type: number
+                total:
+                  type: number
+            cpus:
+              type: integer
+            platform:
+              type: string
+            nodeVersion:
+              type: string
+
+    ReadyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            ready:
+              type: boolean
+            timestamp:
+              type: string
+              format: date-time
+
+    UploadTextRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Log content as text
+          example: "2024-01-15 10:30:00 ERROR: Database connection failed\n2024-01-15 10:30:01 ERROR: Database connection failed"
+        fileName:
+          type: string
+          description: Optional file name
+          example: "app.log"
+
+    UploadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/LogBatch'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    LogBatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+          nullable: true
+        totalLines:
+          type: integer
+        totalErrors:
+          type: integer
+        totalWarnings:
+          type: integer
+        totalInfo:
+          type: integer
+        processedLines:
+          type: integer
+        uploadedAt:
+          type: string
+          format: date-time
+        source:
+          type: string
+          enum:
+            - file
+            - text
+
+    AnalysisResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/AnalysisResult'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    AnalysisResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        batchId:
+          type: string
+          format: uuid
+        analyzedAt:
+          type: string
+          format: date-time
+        totalEntries:
+          type: integer
+        errorCount:
+          type: integer
+        warningCount:
+          type: integer
+        mostFrequentError:
+          $ref: '#/components/schemas/ErrorPattern'
+          nullable: true
+        topErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorPattern'
+        httpStatusSummary:
+          type: object
+          additionalProperties:
+            type: integer
+        errorByCategory:
+          type: object
+          additionalProperties:
+            type: integer
+        timeRange:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+              nullable: true
+            end:
+              type: string
+              format: date-time
+              nullable: true
+
+    ErrorPattern:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pattern:
+          type: string
+        category:
+          type: string
+          enum:
+            - NETWORK
+            - VALIDATION
+            - SERVER
+            - DATABASE
+            - AUTHENTICATION
+            - AUTHORIZATION
+            - TIMEOUT
+            - RATE_LIMIT
+            - NOT_FOUND
+            - BAD_REQUEST
+            - UNKNOWN
+        severity:
+          type: string
+          enum:
+            - CRITICAL
+            - HIGH
+            - MEDIUM
+            - LOW
+        description:
+          type: string
+        occurrences:
+          type: integer
+        firstSeen:
+          type: string
+          format: date-time
+          nullable: true
+        lastSeen:
+          type: string
+          format: date-time
+          nullable: true
+        sampleLines:
+          type: array
+          items:
+            type: string
+
+    TopErrorsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorPattern'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ErrorsByDateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            entries:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+            pagination:
+              $ref: '#/components/schemas/PaginationMeta'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    LogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        lineNumber:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+        level:
+          type: string
+          nullable: true
+        message:
+          type: string
+        source:
+          type: string
+          nullable: true
+        errorCategory:
+          type: string
+        errorSeverity:
+          type: string
+        httpStatus:
+          type: integer
+          nullable: true
+        transactionId:
+          type: string
+          nullable: true
+        userId:
+          type: string
+          nullable: true
+        previousLines:
+          type: array
+          items:
+            type: string
+        nextLines:
+          type: array
+          items:
+            type: string
+
+    RootCauseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RootCauseAnalysis'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    RootCauseAnalysis:
+      type: object
+      properties:
+        errorPattern:
+          $ref: '#/components/schemas/ErrorPattern'
+        occurrences:
+          type: integer
+        affectedLines:
+          type: integer
+        context:
+          type: array
+          items:
+            type: string
+        possibleCauses:
+          type: array
+          items:
+            type: string
+        suggestedFixes:
+          type: array
+          items:
+            type: string
+
+    FilteredEntriesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            entries:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+            pagination:
+              $ref: '#/components/schemas/PaginationMeta'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    BatchesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogBatch'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ResponseMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+          format: uuid
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

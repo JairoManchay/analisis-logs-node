@@ -1,0 +1,28 @@
+export enum ErrorCategory {
+  NETWORK = 'NETWORK',
+  VALIDATION = 'VALIDATION',
+  SERVER = 'SERVER',
+  DATABASE = 'DATABASE',
+  AUTHENTICATION = 'AUTHENTICATION',
+  AUTHORIZATION = 'AUTHORIZATION',
+  TIMEOUT = 'TIMEOUT',
+  RATE_LIMIT = 'RATE_LIMIT',
+  NOT_FOUND = 'NOT_FOUND',
+  BAD_REQUEST = 'BAD_REQUEST',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export enum ErrorSeverity {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
+export enum HttpStatusType {
+  INFO = '1xx',
+  SUCCESS = '2xx',
+  REDIRECT = '3xx',
+  CLIENT_ERROR = '4xx',
+  SERVER_ERROR = '5xx',
+}
