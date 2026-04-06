@@ -1,1 +1,0 @@
-{"version":3,"file":"ILogParser.d.ts","sourceRoot":"","sources":["../../../src/domain/interfaces/ILogParser.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,aAAa,CAAC;AAEvC,MAAM,WAAW,iBAAiB;IAChC,KAAK,CAAC,OAAO,EAAE,MAAM,GAAG,QAAQ,EAAE,CAAC;IACnC,WAAW,CAAC,MAAM,EAAE,MAAM,GAAG,QAAQ,EAAE,CAAC;IACxC,QAAQ,CAAC,IAAI,EAAE,MAAM,GAAG,OAAO,CAAC;CACjC"}
