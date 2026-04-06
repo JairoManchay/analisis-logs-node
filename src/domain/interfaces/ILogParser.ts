@@ -1,16 +1,7 @@
-export interface ILogParser {
-  parse(rawLine: string, lineNumber: number): Promise<ParsedLine>;
-  canParse(rawLine: string): boolean;
-}
+import { LogEntry } from '../entities';
 
-export interface ParsedLine {
-  timestamp: Date | null;
-  level: string | null;
-  message: string;
-  source: string | null;
-  stackTrace: string | null;
-  httpStatus: number | null;
-  transactionId: string | null;
-  userId: string | null;
-  metadata: Record<string, unknown>;
+export interface LogParserStrategy {
+  parse(content: string): LogEntry[];
+  parseStream(buffer: Buffer): LogEntry[];
+  canParse(line: string): boolean;
 }

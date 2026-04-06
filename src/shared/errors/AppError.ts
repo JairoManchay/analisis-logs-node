@@ -1,56 +1,32 @@
 export class AppError extends Error {
-  public readonly statusCode: number;
-  public readonly code: string;
-  public readonly isOperational: boolean;
-
-  constructor(message: string, statusCode: number = 500, code: string = 'INTERNAL_ERROR') {
+  constructor(
+    public statusCode: number,
+    public code: string,
+    message: string,
+    public details?: unknown
+  ) {
     super(message);
-    this.statusCode = statusCode;
-    this.code = code;
-    this.isOperational = true;
-    
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
-export class NotFoundError extends AppError {
-  constructor(resource: string, identifier?: string) {
-    const message = identifier
-      ? `${resource} with identifier '${identifier}' not found`
-      : `${resource} not found`;
-    super(message, 404, 'NOT_FOUND');
+    this.name = 'AppError';
   }
 }
 
 export class ValidationError extends AppError {
-  public readonly details: unknown;
-
   constructor(message: string, details?: unknown) {
-    super(message, 400, 'VALIDATION_ERROR');
-    this.details = details;
+    super(400, 'VALIDATION_ERROR', message, details);
+    this.name = 'ValidationError';
   }
 }
 
-export class BadRequestError extends AppError {
+export class NotFoundError extends AppError {
   constructor(message: string) {
-    super(message, 400, 'BAD_REQUEST');
+    super(404, 'NOT_FOUND', message);
+    this.name = 'NotFoundError';
   }
 }
 
-export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized') {
-    super(message, 401, 'UNAUTHORIZED');
-  }
-}
-
-export class FileTooLargeError extends AppError {
-  constructor(maxSize: number) {
-    super(`File size exceeds maximum allowed size of ${maxSize} bytes`, 413, 'FILE_TOO_LARGE');
-  }
-}
-
-export class UnsupportedMediaTypeError extends AppError {
-  constructor(allowedTypes: string[]) {
-    super(`Unsupported file type. Allowed types: ${allowedTypes.join(', ')}`, 415, 'UNSUPPORTED_MEDIA_TYPE');
+export class InternalError extends AppError {
+  constructor(message: string, details?: unknown) {
+    super(500, 'INTERNAL_ERROR', message, details);
+    this.name = 'InternalError';
   }
 }

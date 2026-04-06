@@ -1,4 +1,2 @@
-export * from './logger';
-export * from './config';
+export * from './Logger';
 export * from './errors';
-export * from './middleware';

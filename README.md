@@ -1,157 +1,156 @@
 # Log Analyzer API
 
-Intelligent log analysis system built with Clean Architecture, TypeScript, and Express.
+API para análisis inteligente de logs con detección de errores repetidos.
 
-## Features
-
-- Upload log files (.log, .txt) or send plain text logs
-- Intelligent error detection and classification
-- Pattern recognition using regex
-- Root cause analysis
-- Date and metadata filtering
-- Top N errors reporting
-- HTTP status code analysis
-
-## Architecture
-
-The project follows Clean Architecture principles with these layers:
-
-```
-src/
-├── domain/           # Business entities, interfaces, value objects
-├── application/       # Use cases, DTOs, mappers
-├── infrastructure/   # Services, parsers, repositories
-├── interfaces/       # Controllers, routes
-└── shared/          # Config, logger, middleware, errors
-```
-
-### Design Patterns Used
-
-- **Factory Pattern**: `ParserFactory` for creating log parsers
-- **Strategy Pattern**: Different parsers for logcat, backend logs
-- **Builder Pattern**: `LogEntryEntity`, `LogBatchEntity`
-- **Singleton Pattern**: Logger, AppConfig
-- **Repository Pattern**: `InMemoryLogRepository`
-- **Dependency Injection**: Through constructor injection
-
-## Installation
+## 🚀 Instalación
 
 ```bash
 npm install
 ```
 
-## Development
+## 🏃 Ejecución
 
 ```bash
+# Desarrollo
 npm run dev
+
+# Producción
+npm run build && npm start
 ```
 
-## Production
+## 📡 Endpoints
+
+### POST /logs/upload
+Sube un archivo de log y retorna ID del análisis.
 
 ```bash
-npm run build
-npm start
+curl -X POST -F "log=@sample.log" http://localhost:3000/logs/upload
 ```
 
-## Testing
-
-```bash
-npm test
-```
-
-## API Endpoints
-
-### Health Check
-```
-GET /health
-```
-
-### Upload Log File
-```
-POST /logs/upload
-Content-Type: multipart/form-data
-
-file: <log file>
-```
-
-### Upload Log Text
-```
-POST /logs/upload-text
-Content-Type: application/json
-
+**Respuesta:**
+```json
 {
-  "content": "log content...",
-  "fileName": "optional.txt"
+  "id": "uuid-del-analisis",
+  "filename": "sample.log",
+  "totalLines": 20,
+  "totalErrors": 11,
+  "message": "Log file uploaded and analyzed successfully"
 }
 ```
 
-### Analyze Logs
-```
-POST /logs/analyze/:batchId
-```
-
-### Get Top Errors
-```
-GET /logs/errors/top/:batchId?n=10&category=NETWORK
-```
-
-### Get Errors by Date
-```
-GET /logs/errors/by-date/:batchId?startDate=2024-01-01&endDate=2024-01-31
-```
-
-### Get Root Cause Analysis
-```
-GET /logs/errors/root-cause/:batchId?patternId=optional
-```
-
-### Filter Entries
-```
-GET /logs/filter/:batchId?page=1&limit=50&errorCategory=SERVER&severity=HIGH
-```
-
-### Get All Batches
-```
-GET /logs/batches
-```
-
-## Error Categories
-
-- `NETWORK` - Network connectivity issues
-- `VALIDATION` - Data validation errors
-- `SERVER` - Internal server errors
-- `DATABASE` - Database errors
-- `AUTHENTICATION` - Auth failures
-- `AUTHORIZATION` - Permission errors
-- `TIMEOUT` - Timeout errors
-- `RATE_LIMIT` - Rate limiting
-- `NOT_FOUND` - Resource not found
-- `BAD_REQUEST` - Bad request errors
-- `UNKNOWN` - Uncategorized errors
-
-## Severity Levels
-
-- `CRITICAL` - Immediate action required
-- `HIGH` - High priority
-- `MEDIUM` - Moderate priority
-- `LOW` - Low priority
-
-## Example Usage
-
-### Upload and Analyze
+### POST /logs/analyze
+Sube un archivo de log y retorna análisis completo.
 
 ```bash
-# Upload a log file
-curl -X POST http://localhost:3000/logs/upload \
-  -F "file=@app.log"
-
-# Get analysis results
-curl http://localhost:3000/logs/analyze/{batchId}
-
-# Get top 5 errors
-curl http://localhost:3000/logs/errors/top/{batchId}?n=5
+curl -X POST -F "log=@sample.log" http://localhost:3000/logs/analyze
 ```
 
-## License
+**Respuesta:**
+```json
+{
+  "mostFrequentError": {
+    "message": "El objeto no fue encontrado",
+    "service": "/API/MID-CORE-BANK/PRD/V1/customer",
+    "line": 5,
+    "count": 5,
+    "dnIs": ["12345678A"]
+  },
+  "errors": [
+    {
+      "message": "El objeto no fue encontrado",
+      "service": "/API/MID-CORE-BANK/PRD/V1/customer",
+      "line": 5,
+      "count": 5,
+      "dnIs": ["12345678A"]
+    },
+    {
+      "message": "multiples cambiso isntanctances",
+      "service": "/API/MID-CORE-BANK/PRD/V1/account",
+      "line": 22,
+      "count": 4,
+      "dnIs": []
+    },
+    {
+      "message": "Timeout de conexión",
+      "service": "/API/MID-CORE-BANK/PRD/V1/account",
+      "line": 8,
+      "count": 1,
+      "dnIs": ["87654321B"]
+    },
+    {
+      "message": "Saldo insuficiente",
+      "service": "/API/MID-CORE-BANK/PRD/V1/transaction",
+      "line": 17,
+      "count": 1,
+      "dnIs": []
+    }
+  ],
+  "totalErrors": 11,
+  "totalLines": 20,
+  "analyzedAt": "2026-03-31T..."
+}
+```
 
-MIT
+### GET /logs/errors
+Obtiene errores con filtros opcionales.
+
+```bash
+# Sin filtros
+curl http://localhost:3000/logs/errors
+
+# Filtrar por DNI
+curl "http://localhost:3000/logs/errors?dni=12345678A"
+
+# Filtrar por servicio
+curl "http://localhost:3000/logs/errors?service=customer"
+```
+
+## 🏗️ Arquitectura
+
+```
+src/
+├── domain/
+│   ├── entities/        # LogEntry, ErrorGroup, ParsedLogFile
+│   └── interfaces/     # ILogParser, ILogRepository
+├── application/
+│   ├── services/       # StandardLogParser, LogParserFactory, LogAnalyzerService
+│   └── usecases/      # UploadLogUseCase, GetErrorsUseCase
+├── infrastructure/
+│   ├── repositories/  # InMemoryLogRepository
+│   ├── validation/    # Zod schemas
+│   └── http/          # Express controllers
+├── interfaces/        # ILogController
+└── shared/           # Logger, AppError
+```
+
+## 🧩 Patrones Implementados
+
+| Patrón | Ubicación | Propósito |
+|--------|-----------|-----------|
+| Strategy | `StandardLogParser` | Parseo flexible de logs |
+| Factory | `LogParserFactory` | Creación de parsers |
+| Repository | `InMemoryLogRepository` | Persistencia de datos |
+| Builder | Respuestas DTO | Construcción de respuestas |
+| Singleton | `Logger` | Logging global |
+
+## 🔧 Tecnologías
+
+- Node.js + TypeScript
+- Express.js
+- Multer (upload archivos)
+- Zod (validación)
+- Soporte para archivos grandes
+
+## 📝 Formato de Log Esperado
+
+```
+MM-DD HH:MM:SS.mmm [LEVEL] mensaje
+03-23 10:03:13.960 E Error Envió: {"message":"El objeto no fue encontrado"}
+03-23 10:03:13.961 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/customer
+```
+
+La API extrae automáticamente:
+- Servicio (endpoint /API/...)
+- DNI (8 dígitos + letra)
+- Mensaje de error
+- Número de línea

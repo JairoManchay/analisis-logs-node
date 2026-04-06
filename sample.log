@@ -1,0 +1,31 @@
+03-23 10:03:10.123 I Server started on port 3000
+03-23 10:03:11.456 I Loading configuration...
+03-23 10:03:12.789 W Cache miss for user 12345678A
+03-23 10:03:13.960 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/customer
+03-23 10:03:13.961 E Error Envió: {"message":"El objeto no fue encontrado"}
+03-23 10:03:14.102 I Processing request from 87654321B
+03-23 10:03:15.234 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/account
+03-23 10:03:15.235 E Error Envió: {"message":"Timeout de conexión"}
+03-23 10:03:16.367 I Connection established
+03-23 10:03:17.490 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/customer
+03-23 10:03:17.491 E Error Envió: {"message":"El objeto no fue encontrado"}
+03-23 10:03:18.622 I Request completed successfully
+03-23 10:03:19.755 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/customer
+03-23 10:03:19.756 E Error Envió: {"message":"El objeto no fue encontrado"}
+03-23 10:03:20.888 W Memory usage at 75%
+03-23 10:03:21.919 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/transaction
+03-23 10:03:21.920 E Error Envió: {"message":"Saldo insuficiente"}
+03-23 10:03:23.051 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/customer
+03-23 10:03:23.052 E Error Envió: {"message":"El objeto no fue encontrado"}
+03-23 10:03:24.183 I Cleanup completed
+03-23 10:03:25.314 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/account
+03-23 10:03:25.315 E Error Envió: {"message":"multiples cambiso isntanctances"}
+03-23 10:03:26.446 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/account
+03-23 10:03:26.447 E Error Envió: {"message":"multiples cambiso isntanctances"}
+03-23 10:03:27.578 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/customer
+03-23 10:03:27.579 E Error Envió: {"message":"El objeto no fue encontrado"}
+03-23 10:03:28.710 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/account
+03-23 10:03:28.711 E Error Envió: {"message":"multiples cambiso isntanctances"}
+03-23 10:03:29.842 I Health check passed
+03-23 10:03:30.973 E Endpoint92fede...: /API/MID-CORE-BANK/PRD/V1/account
+03-23 10:03:30.974 E Error Envió: {"message":"multiples cambiso isntanctances"}
